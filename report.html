@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Geo-Tagged Report Demo</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    body { font-family: Inter, system-ui, sans-serif; margin:0; }
+    #map { height: 60vh; }
+    .panel { padding:16px; max-width:900px; margin:12px auto; }
+    .row { display:flex; gap:8px; }
+    input, textarea, select { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
+    .btn { padding:10px 14px; border-radius:8px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="panel">
+    <h2>Report an Issue</h2>
+    <div>
+      <label>Title</label>
+      <input id="title" placeholder="e.g. Blocked drain at corner" />
+    </div>
+    <div>
+      <label>Category</label>
+      <select id="category">
+        <option value="1">Garbage</option>
+        <option value="2">Road Damage</option>
+        <option value="3">Flooding</option>
+        <option value="4">Streetlight</option>
+      </select>
+    </div>
+    <div>
+      <label>Description</label>
+      <textarea id="desc" rows="3" placeholder="Add details..."></textarea>
+    </div>
+    <div class="row">
+      <div style="flex:1">
+        <label>Latitude</label>
+        <input id="lat" readonly />
+      </div>
+      <div style="flex:1">
+        <label>Longitude</label>
+        <input id="lng" readonly />
+      </div>
+    </div>
+    <div>
+      <label>Photos</label>
+      <input id="photos" type="file" accept="image/*" multiple />
+    </div>
+    <div style="margin-top:8px;">
+      <button id="submit" class="btn">Submit Report</button>
+    </div>
+    <div id="status" style="margin-top:10px;color:green"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([14.656, 121.034], 13); // default to Manila area
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '' }).addTo(map);
+
+    const pin = L.marker([14.656, 121.034], { draggable: true }).addTo(map);
+    const latInput = document.getElementById('lat');
+    const lngInput = document.getElementById('lng');
+
+    function updateInputs(lat, lng){
+      latInput.value = lat.toFixed(6);
+      lngInput.value = lng.toFixed(6);
+    }
+    pin.on('move', e => updateInputs(e.latlng.lat, e.latlng.lng));
+
+    // Try geolocation
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        const { latitude, longitude } = pos.coords;
+        map.setView([latitude, longitude], 16);
+        pin.setLatLng([latitude, longitude]);
+        updateInputs(latitude, longitude);
+      }, err => {
+        updateInputs(14.656, 121.034);
+      });
+    }
+
+    // Submit flow: for demo we will POST JSON; file upload should use presigned URLs or FormData
+    document.getElementById('submit').addEventListener('click', async () => {
+      const payload = {
+        title: document.getElementById('title').value,
+        category_id: document.getElementById('category').value,
+        description: document.getElementById('desc').value,
+        latitude: parseFloat(latInput.value),
+        longitude: parseFloat(lngInput.value)
+      };
+      document.getElementById('status').textContent = 'Submitting...';
+
+      try {
+        // NOTE: Replace URL with your backend endpoint, and implement file upload separately.
+        const res = await fetch('/api/reports', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Network response not ok');
+        const data = await res.json();
+        document.getElementById('status').textContent = 'Report submitted! ID: ' + data.id;
+      } catch (err) {
+        document.getElementById('status').style.color = 'red';
+        document.getElementById('status').textContent = 'Submit failed: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
