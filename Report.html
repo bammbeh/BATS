@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin Dashboard - GeoTagged Reports</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <!-- Navbar -->
+  <nav class="bg-blue-700 text-white px-6 py-3 flex justify-between items-center">
+    <h1 class="text-xl font-bold">Barangay Admin Dashboard</h1>
+    <button class="bg-red-500 px-3 py-1 rounded-lg hover:bg-red-600">Logout</button>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto p-6">
+    <!-- Page Title -->
+    <h2 class="text-2xl font-semibold mb-4">📋 Reported Issues</h2>
+
+    <!-- Reports Table -->
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+      <table class="w-full border-collapse">
+        <thead class="bg-gray-200 text-left">
+          <tr>
+            <th class="px-4 py-2">ID</th>
+            <th class="px-4 py-2">Category</th>
+            <th class="px-4 py-2">Description</th>
+            <th class="px-4 py-2">Location</th>
+            <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Example Row -->
+          <tr class="border-t">
+            <td class="px-4 py-2">#RPT-001</td>
+            <td class="px-4 py-2">Garbage</td>
+            <td class="px-4 py-2">Overflowing trash bins near the plaza</td>
+            <td class="px-4 py-2">14.657, 121.034</td>
+            <td class="px-4 py-2">
+              <span class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-sm">Submitted</span>
+            </td>
+            <td class="px-4 py-2">
+              <button class="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                onclick="openReport('#RPT-001','Garbage','Overflowing trash bins near the plaza',14.657,121.034,'Submitted')">
+                View
+              </button>
+            </td>
+          </tr>
+          <tr class="border-t">
+            <td class="px-4 py-2">#RPT-002</td>
+            <td class="px-4 py-2">Streetlight</td>
+            <td class="px-4 py-2">Lamp post not working near school gate</td>
+            <td class="px-4 py-2">14.660, 121.038</td>
+            <td class="px-4 py-2">
+              <span class="bg-blue-200 text-blue-800 px-2 py-1 rounded text-sm">In Progress</span>
+            </td>
+            <td class="px-4 py-2">
+              <button class="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                onclick="openReport('#RPT-002','Streetlight','Lamp post not working near school gate',14.660,121.038,'In Progress')">
+                View
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full">
+      <div class="p-4 border-b flex justify-between items-center">
+        <h3 class="text-lg font-semibold">Report Details</h3>
+        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">&times;</button>
+      </div>
+      <div class="p-4 space-y-3">
+        <p><b>ID:</b> <span id="rptId"></span></p>
+        <p><b>Category:</b> <span id="rptCategory"></span></p>
+        <p><b>Description:</b> <span id="rptDesc"></span></p>
+        <p><b>Status:</b> <span id="rptStatus"></span></p>
+        <div id="map" class="h-64 w-full rounded"></div>
+      </div>
+      <div class="p-4 border-t text-right">
+        <button onclick="closeModal()" class="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400">Close</button>
+        <button class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Update Status</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let map, marker;
+
+    function openReport(id, category, desc, lat, lng, status) {
+      // Fill report details
+      document.getElementById("rptId").textContent = id;
+      document.getElementById("rptCategory").textContent = category;
+      document.getElementById("rptDesc").textContent = desc;
+      document.getElementById("rptStatus").textContent = status;
+
+      // Show modal
+      document.getElementById("reportModal").classList.remove("hidden");
+      document.getElementById("reportModal").classList.add("flex");
+
+      // Initialize or reset map
+      setTimeout(() => {
+        if (!map) {
+          map = L.map("map").setView([lat, lng], 16);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: ""
+          }).addTo(map);
+          marker = L.marker([lat, lng]).addTo(map);
+        } else {
+          map.setView([lat, lng], 16);
+          marker.setLatLng([lat, lng]);
+        }
+      }, 200); // delay ensures modal is visible before map render
+    }
+
+    function closeModal() {
+      document.getElementById("reportModal").classList.add("hidden");
+      document.getElementById("reportModal").classList.remove("flex");
+    }
+  </script>
+</body>
+</html>
