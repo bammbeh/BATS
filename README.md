@@ -1,16 +1,16 @@
-📚 University Project Repository
+# 📚 University Project Repository
 
 This repository contains files, code, and other materials created exclusively for an academic project.
 
-⚠️ Important Notice
+## ⚠️ Important Notice
 
 All content in this repository — including code, documents, and assets — is protected and intended only for educational and evaluation purposes.
 
-🚫 Do not copy, redistribute, or reuse any part of this repository without explicit written permission from the author.
+### 🚫 Do not copy, redistribute, or reuse any part of this repository without explicit written permission from the author.
 
 Unauthorized reproduction or distribution of any content from this project may violate university academic integrity policies and intellectual property laws.
 
-✅ Usage Permission
+## ✅ Usage Permission
 
 If you wish to:
 
